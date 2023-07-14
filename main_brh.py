@@ -18,7 +18,7 @@ def convertBRH(filepath, filename):
     global totalCount
     print(f'Converting data from file : {filename}')
     taux_brh = pd.DataFrame(columns=['DATE', 'TAUX'])
-    #filepath = 'C:\\Users\\user\\Desktop\\github\\pdf-to-csv\\working_files\\9394.pdf'
+
     try: 
         tables = camelot.read_pdf(filepath, flavor='stream', pages="all")
     except: 
@@ -56,7 +56,8 @@ def convertBRH(filepath, filename):
     #taux_brh = taux_brh.sort_values(by='DATE',ascending=True)
 
 
-startRep = 'C:\\Users\\user\\Desktop\\github\\pdf-to-csv\\working_files\\'
+startRep = 'C:\\Users\\user\\Desktop\\github\\pdf-to-csv\\working_files\\'  # Change to the default folderpath with the BRH pdf files
+destRep = 'C:\\Users\\user\\Desktop\\github\\pdf-to-csv\\working_files\\' # Change to the default folderpath where you want to save the csv file
 filenames = os.listdir(startRep)
 totalCount = 0
 i = 0
@@ -66,9 +67,9 @@ for each in filenames:
     taux_brh = convertBRH(filepath, each)
     if not taux_brh.empty:
         if i > 0:
-            taux_brh.to_csv('C:\\Users\\user\\Desktop\\github\\pdf-to-csv\\working_files\\' + 'taux_brh.csv', mode='a', header=False, index=False, encoding='UTF-8', sep=';')
+            taux_brh.to_csv(destRep + 'taux_brh.csv',  mode='a', header=False, index=False, encoding='UTF-8', sep=';')
         else:
-            taux_brh.to_csv('C:\\Users\\user\\Desktop\\github\\pdf-to-csv\\working_files\\' + 'taux_brh.csv', index=False, encoding='UTF-8', sep=';')
+            taux_brh.to_csv(destRep + 'taux_brh.csv', index=False, encoding='UTF-8', sep=';')
         i += 1
     else: print(f'Skipped file: {each}. Camelot cannot extract tables.')
 
