@@ -1,17 +1,11 @@
 import camelot
+from datetime import datetime
 import re
-import pyodbc
+import pandas as pd
+import os
 
-def insertData(dsn,nom,nodos,total):
-    conn = pyodbc.connect(DSN=dsn,UID="dba",PWD="ii4pr0g1+3k01")
-    cursor = conn.cursor()
-    cursor.execute("SET TEMPORARY OPTION CONNECTION_AUTHENTICATION='Company=Progitek;Application=Progitek;Signature=000fa55157edb8e14d818eb4fe3db41447146f1571g7cf6b1c162e7a4e4925570fc8104c82ac6d466c6'")
-
-    query = f"INSERT INTO compte_recevoir(nodos,nom,total) VALUES('{nodos}','{nom}','{total}')"
-    cursor.execute(query)
-    cursor.commit()
-
-    conn.close()
+monthAbb = ['jan','janv','feb','févr','mar','mars','apr','avr','may','mai','jun','juin','jul','juil','aug','août','sep','sept','oct','nov','dec','déc']
+monthNum = ['01','01','02','02','03','03','04','04','05','05','06','06','07','07','08','08','09','09','10','11','12','12']
 
 def isfloat(num):
     try:
@@ -19,29 +13,63 @@ def isfloat(num):
         return True
     except ValueError:
         return False
-      
-file = 'C:/ii4net/migCAR/taux_brh/2022-2023.pdf'
-tables = camelot.read_pdf(file, flavor='stream', pages="all")
-pages = len(tables)
-tables[0].df
-tables[0].df.shape[0]
-for page in range(0, pages):
-    lastRowIndex = tables[page].df.shape[0]-1
-    lastColIndex = tables[page].df.shape[1]-1
-    print(f'-----------DATA FROM PAGE {page}----------')
-    date = None
-    taux = None
 
-    for i in range(0, lastRowIndex):
-        date = None
-        taux = None
-        if isfloat(tables[page].df.iloc[i,3].replace(",",".").strip()) == True:
-            date = tables[page].df.iloc[i,0].replace(",",".").strip()
-            taux = tables[page].df.iloc[i,3].replace(",",".").strip()
-            print(f'Taux HTG/USD du {date} = {taux}')
-        if isfloat(tables[page].df.iloc[i,lastRowIndex].replace(",",".").strip()) == True:
-            date = tables[page].df.iloc[i,4].replace(",",".").strip()
-            taux = tables[page].df.iloc[i,lastRowIndex].replace(",",".").strip()
-            print(f'Taux HTG/USD du {date} = {taux}')
+def convertBRH(filepath, filename):
+    global totalCount
+    print(f'Converting data from file : {filename}')
+    taux_brh = pd.DataFrame(columns=['DATE', 'TAUX'])
+    #filepath = 'C:\\Users\\user\\Desktop\\github\\pdf-to-csv\\working_files\\9394.pdf'
+    try: 
+        tables = camelot.read_pdf(filepath, flavor='stream', pages="all")
+    except: 
+        return pd.DataFrame()
+    
+    pages = len(tables)
+    pageRecord = 0
+    allRecord = 0
 
-print('---------- OPERATION IS DONE ----------')
+    for page in range(0, pages):
+        for i in range(0, tables[page].shape[0]):
+            for j in range(0, tables[page].shape[1]):
+                val = tables[page].df.iloc[i,j].lower()
+                if len(re.findall('\d+-(\D+)-\d+', val)) != 0:
+                    month = re.findall('\d+-(\D+)-\d+', val)[0]
+                    date = val.replace(month, monthNum[monthAbb.index(month)])
+                    #try: date = datetime.strptime(date, '%d-%m-%y').date()
+                    #except: pass
+                    for k in range(j+1, tables[page].shape[1]):
+                        if isfloat(tables[page].df.iloc[i,k].replace(",",".")) == True:
+                            rate = str(tables[page].df.iloc[i,k].replace(".",","))
+                            #print(f'{date}    {rate}')
+                            obs = pd.DataFrame([[date, rate]], columns=['DATE', 'TAUX'])
+                            taux_brh = pd.concat([taux_brh, obs], axis=0)
+                            pageRecord += 1
+                            allRecord += 1
+                            totalCount += 1
+                            break
+
+        print(f'Page {page+1}/{pages}: {pageRecord} obs')
+        pageRecord = 0
+    print(f'Total = {allRecord} observations')
+
+    return taux_brh
+    #taux_brh = taux_brh.sort_values(by='DATE',ascending=True)
+
+
+startRep = 'C:\\Users\\user\\Desktop\\github\\pdf-to-csv\\working_files\\'
+filenames = os.listdir(startRep)
+totalCount = 0
+i = 0
+
+for each in filenames:
+    filepath = os.path.join(startRep, each)
+    taux_brh = convertBRH(filepath, each)
+    if not taux_brh.empty:
+        if i > 0:
+            taux_brh.to_csv('C:\\Users\\user\\Desktop\\github\\pdf-to-csv\\working_files\\' + 'taux_brh.csv', mode='a', header=False, index=False, encoding='UTF-8', sep=';')
+        else:
+            taux_brh.to_csv('C:\\Users\\user\\Desktop\\github\\pdf-to-csv\\working_files\\' + 'taux_brh.csv', index=False, encoding='UTF-8', sep=';')
+        i += 1
+    else: print(f'Skipped file: {each}. Camelot cannot extract tables.')
+
+print(f'----Operation Finished. {totalCount} lines of data have been converted to csv file----')
