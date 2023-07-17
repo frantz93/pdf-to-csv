@@ -24,4 +24,4 @@ Voici un aperçu du résultat obtenu dans Excel :
 
 * Et aussi pour ceux qui s'intéresse à l'économie haïtienne, voici l'évolution du taux de change observée au cours des 20 dernières années
 
-![graph_view](https://github.com/frantz93/pdf-to-csv/assets/105858731/9a45819a-60ae-4b8e-bfa1-e21775875d52)
+![graph_view](https://github.com/frantz93/pdf-to-csv/assets/105858731/8c8fedf6-3e16-40ae-a1f1-b0d0f71e9d7f)
