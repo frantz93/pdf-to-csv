@@ -15,15 +15,16 @@ def isfloat(num):
         return False
 
 def convertBRH(filepath, filename):
-    global totalCount
+    global totalCount; global taux_brh
+    taux_brh = pd.DataFrame()
     print(f'Converting data from file : {filename}')
-    taux_brh = pd.DataFrame(columns=['DATE', 'TAUX'])
-
+    
     try: 
         tables = camelot.read_pdf(filepath, flavor='stream', pages="all")
     except: 
-        return pd.DataFrame()
+        return
     
+    taux_brh = pd.DataFrame(columns=['DATE', 'TAUX'])
     pages = len(tables)
     pageRecord = 0
     allRecord = 0
@@ -35,8 +36,9 @@ def convertBRH(filepath, filename):
                 if len(re.findall('\d+-(\D+)-\d+', val)) != 0:
                     month = re.findall('\d+-(\D+)-\d+', val)[0]
                     date = val.replace(month, monthNum[monthAbb.index(month)])
-                    #try: date = datetime.strptime(date, '%d-%m-%y').date()
-                    #except: pass
+                    date = re.findall('\d+-\d+-\d+', date)[0]
+                    try: date = datetime.strptime(date, '%d-%m-%y').date()
+                    except: pass
                     for k in range(j+1, tables[page].shape[1]):
                         if isfloat(tables[page].df.iloc[i,k].replace(",",".")) == True:
                             rate = str(tables[page].df.iloc[i,k].replace(".",","))
@@ -52,8 +54,7 @@ def convertBRH(filepath, filename):
         pageRecord = 0
     print(f'Total = {allRecord} observations')
 
-    return taux_brh
-    #taux_brh = taux_brh.sort_values(by='DATE',ascending=True)
+    return
 
 
 startRep = 'C:\\Users\\user\\Desktop\\github\\pdf-to-csv\\working_files\\'  # Change to the default folderpath with the BRH pdf files
@@ -64,8 +65,10 @@ i = 0
 
 for each in filenames:
     filepath = os.path.join(startRep, each)
-    taux_brh = convertBRH(filepath, each)
+    convertBRH(filepath, each)
     if not taux_brh.empty:
+        taux_brh = taux_brh.drop_duplicates()   #remove all duplicate rows base on all columns
+        taux_brh = taux_brh.sort_values(by='DATE',ascending=True)   #sort dataframe by DATE column ASC
         if i > 0:
             taux_brh.to_csv(destRep + 'taux_brh.csv',  mode='a', header=False, index=False, encoding='UTF-8', sep=';')
         else:
