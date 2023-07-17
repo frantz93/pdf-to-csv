@@ -20,7 +20,7 @@ Le script se trouve dans le fichier `main_brh.py`. Pour convertir les données d
 Voici un aperçu du résultat obtenu dans Excel :
 * Un extrait du tableau de taux de change
 
-![tab_view](https://github.com/frantz93/pdf-to-csv/assets/105858731/3a9136cb-fb92-46a1-9c79-1b05c31b8997)
+![graph_view](https://github.com/frantz93/pdf-to-csv/assets/105858731/1f730c45-03b4-4355-b707-6e3d228f4b78)
 
 * Et aussi pour ceux qui s'intéresse à l'économie haïtienne, voici l'évolution du taux de change observée au cours des 20 dernières années
 
