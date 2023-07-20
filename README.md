@@ -14,7 +14,7 @@ Le script se trouve dans le fichier `main_brh.py`. Pour convertir les données d
    * `pandas`
 4. Changer la valeur de la variable `startRep` (ligne 59) dans le Script. Vous mettrez l'adresse du répertoire sur votre ordinateur où se trouvent les fichiers pdf téléchargés depuis le site de la BRH.
 5. Changer la valeur de la variable `destRep` (ligne 60) dans le Script. Vous mettrez l'adresse du répertoire sur votre ordinateur où vous vouler exporter le fichier csv contenant les données de taux de change.
-6. Exécuter le script _one-shot_. Les données seront stockées dans un fichier nommés __taux_brh.csv__ dans le répertoire désigné.
+6. Exécuter le script _one-shot_. Les données seront stockées dans un fichier nommé __taux_brh.csv__ situé dans le répertoire désigné à l'étape 1.
 
 ### Résultats
 Voici un aperçu du résultat obtenu dans Excel :
